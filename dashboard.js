@@ -13,6 +13,13 @@ import {
   onAuthStateChanged,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 /* ====== REPLACE THESE VALUES WITH YOUR FIREBASE CONFIG ====== */
 const firebaseConfig = {
@@ -153,18 +160,25 @@ window._logout = async function () {
   }
 };
 
-// Assuming you already have userId from auth
-const userId = firebase.auth().currentUser.uid;
+// 🔹 Fetch and display transactions for this user
+onAuthStateChanged(auth, async (user) => {
+  if (!transfersList) return; // Prevents crashes if element is missing
 
-// Reference to the container
-const transfersList = document.querySelector(".transfers-list");
+  if (!user) {
+    transfersList.innerHTML = "<p>Please log in to see your transactions.</p>";
+    return;
+  }
 
-// Fetch transactions for this user
-db.collection("transactions")
-  .where("userId", "==", userId)
-  .orderBy("createdAt", "desc")
-  .get()
-  .then((querySnapshot) => {
+  const userId = user.uid;
+
+  try {
+    const q = query(
+      collection(db, "transactions"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+    const querySnapshot = await getDocs(q);
+
     transfersList.innerHTML = ""; // Clear old data
 
     if (querySnapshot.empty) {
@@ -172,41 +186,39 @@ db.collection("transactions")
       return;
     }
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const amount = data.amount;
-      const type = data.type;
-      const date = data.createdAt
-        ? data.createdAt.toDate().toLocaleString()
-        : "N/A";
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const amount = data.amount || 0;
+      const type = data.type || "Unknown";
+      const date = data.createdAt?.toDate().toLocaleString() || "N/A";
 
-      // Create message and row styling
-      let message = "";
-      const row = document.createElement("div");
-      row.classList.add("transaction-item");
-
+      // Build transaction message
+      let message;
       if (type === "admin_topup") {
         message = `You just received $${amount}`;
-        row.classList.add("transaction-received");
       } else if (type === "withdrawal") {
         message = `You withdrew $${amount}`;
-        row.classList.add("transaction-withdrawal");
       } else {
         message = `${type}: $${amount}`;
       }
 
-      // Build row
+      // Create row
+      const row = document.createElement("div");
+      row.classList.add("transaction-item");
+      if (type === "admin_topup") row.classList.add("transaction-received");
+      if (type === "withdrawal") row.classList.add("transaction-withdrawal");
+
       row.innerHTML = `
         <div class="transaction-details">
           <p class="transaction-type">${message}</p>
           <p class="transaction-date">${date}</p>
         </div>
       `;
+
       transfersList.appendChild(row);
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error("Error fetching transactions:", error);
     transfersList.innerHTML = "<p>Error loading transactions.</p>";
-  });
-
+  }
+});
