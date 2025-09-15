@@ -152,3 +152,61 @@ window._logout = async function () {
     console.error("Logout failed:", err);
   }
 };
+
+// Assuming you already have userId from auth
+const userId = firebase.auth().currentUser.uid;
+
+// Reference to the container
+const transfersList = document.querySelector(".transfers-list");
+
+// Fetch transactions for this user
+db.collection("transactions")
+  .where("userId", "==", userId)
+  .orderBy("createdAt", "desc")
+  .get()
+  .then((querySnapshot) => {
+    transfersList.innerHTML = ""; // Clear old data
+
+    if (querySnapshot.empty) {
+      transfersList.innerHTML = "<p>No transactions yet.</p>";
+      return;
+    }
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const amount = data.amount;
+      const type = data.type;
+      const date = data.createdAt
+        ? data.createdAt.toDate().toLocaleString()
+        : "N/A";
+
+      // Create message and row styling
+      let message = "";
+      const row = document.createElement("div");
+      row.classList.add("transaction-item");
+
+      if (type === "admin_topup") {
+        message = `You just received $${amount}`;
+        row.classList.add("transaction-received");
+      } else if (type === "withdrawal") {
+        message = `You withdrew $${amount}`;
+        row.classList.add("transaction-withdrawal");
+      } else {
+        message = `${type}: $${amount}`;
+      }
+
+      // Build row
+      row.innerHTML = `
+        <div class="transaction-details">
+          <p class="transaction-type">${message}</p>
+          <p class="transaction-date">${date}</p>
+        </div>
+      `;
+      transfersList.appendChild(row);
+    });
+  })
+  .catch((error) => {
+    console.error("Error fetching transactions:", error);
+    transfersList.innerHTML = "<p>Error loading transactions.</p>";
+  });
+

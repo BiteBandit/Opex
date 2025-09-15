@@ -829,4 +829,45 @@ textarea:focus,
 button:focus {
   outline: 0;
   box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
+
+.transfers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.transaction-type {
+  font-weight: bold;
+  color: #333;
+}
+
+.transaction-date {
+  font-size: 12px;
+  color: #777;
+}
+
+.transaction-amount {
+  font-size: 16px;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.transaction-received .transaction-type {
+  color: #4caf50;
+}
+
+.transaction-withdrawal .transaction-type {
+  color: #f44336;
+}
+
+
