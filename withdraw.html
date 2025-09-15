@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opex Withdrawal</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="withdraw.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Be Vietnam Pro", sans-serif;
+        background: #1f1f1f;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 450px;
+        background: #1f1f1f;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        color: white;
+        animation: fadeIn 0.8s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .app-header {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo-icon {
+        width: 50px;
+        height: 50px;
+        background: #007bff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        color: white;
+      }
+
+      .logo-title span:first-child {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .logo-title span:last-child {
+        font-size: 14px;
+        color: #bbb;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: 600;
+        margin: 10px 0 5px;
+        display: block;
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        border: none;
+        font-size: 16px;
+      }
+
+      input,
+      select {
+        background: #2b2b2b;
+        color: white;
+        border: 1px solid #444;
+      }
+
+      button {
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #0056b3;
+        transform: scale(1.05);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .transfer {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+        justify-content: center;
+      }
+
+      .transfer-logo {
+        background: #fff;
+        border-radius: 10px;
+        padding: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .transfer-logo:hover {
+        transform: scale(1.1);
+      }
+
+      .transfer-logo img {
+        width: 60px;
+        height: auto;
+      }
+
+      .dropdown-field {
+        position: relative;
+      }
+
+      .dropdown-field select {
+        appearance: none;
+        padding-right: 40px;
+      }
+
+      .dropdown-field i {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="logo">
+          <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+          <div class="logo-title">
+            <span>Opex</span>
+            <span>Withdrawal</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-body">
+        <section class="transfer-section">
+          <div class="transfer-section-header">
+            <h2>Withdraw Funds</h2>
+          </div>
+
+          <form id="withdrawForm">
+            <label for="amount">Amount to Withdraw</label>
+            <input
+              type="number"
+              id="amount"
+              placeholder="Enter amount"
+              required
+            />
+
+            <label for="method">Select Payment Method</label>
+            <select id="method" required>
+              <option value="">Choose Method</option>
+              <option value="crypto">Crypto (USDT)</option>
+              <option value="paypal">PayPal</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+
+            <!-- Crypto -->
+            <div id="cryptoFields" class="hidden">
+              <label for="usdtAddress">USDT Wallet Address</label>
+              <input
+                type="text"
+                id="usdtAddress"
+                placeholder="Enter USDT Address"
+              />
+            </div>
+
+            <!-- PayPal -->
+            <div id="paypalFields" class="hidden">
+              <label for="paypalEmail">PayPal Email</label>
+              <input
+                type="email"
+                id="paypalEmail"
+                placeholder="Enter PayPal Email"
+              />
+            </div>
+
+            <!-- Bank -->
+            <div id="bankFields" class="hidden">
+              <label for="bankName">Select Bank</label>
+              <div class="dropdown-field">
+                <select id="bankName">
+                  <option value="">Choose Bank</option>
+                  <option value="Chase Bank">BNP Paribas</option>
+                  <option value="HSBC">HSBC</option>
+                  <option value="Barclays">JPMorgan Chase</option>
+                  <option value="Citibank">Citibank</option>
+                </select>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="transfer">
+                <div class="transfer-logo" data-bank="BNP Paribas">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/BNP_Paribas_logo.svg/2560px-BNP_Paribas_logo.svg.png"
+                    alt="BNP Paribas"
+                  />
+                </div>
+                <div class="transfer-logo" data-bank="HSBC">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/HSBC_logo_%282018%29.svg/2560px-HSBC_logo_%282018%29.svg.png"
+                    alt="HSBC"
+                  />
+                </div>
+                <div class="transfer-logo" data-bank="JPMorgan Chase">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/JPMorgan_Chase_Logo_2011.svg/2560px-JPMorgan_Chase_Logo_2011.svg.png"
+                    alt="JPMorgan Chase"
+                  />
+                </div>
+                <div class="transfer-logo" data-bank="Citibank">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Citi.svg/2560px-Citi.svg.png"
+                    alt="Citibank"
+                  />
+                </div>
+              </div>
+              <label for="accountNumber">Account Number</label>
+              <input
+                type="text"
+                id="accountNumber"
+                placeholder="Enter Account Number"
+              />
+            </div>
+
+            <label for="opexToken">OPEX Token</label>
+            <input
+              type="text"
+              id="opexToken"
+              placeholder="Enter OPEX Token"
+              required
+            />
+
+            <button type="submit">Withdraw</button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const methodSelect = document.getElementById("method");
+      const cryptoFields = document.getElementById("cryptoFields");
+      const paypalFields = document.getElementById("paypalFields");
+      const bankFields = document.getElementById("bankFields");
+      const bankNameSelect = document.getElementById("bankName");
+      const logos = document.querySelectorAll(".transfer-logo");
+
+      // Toggle form fields
+      methodSelect.addEventListener("change", () => {
+        cryptoFields.classList.add("hidden");
+        paypalFields.classList.add("hidden");
+        bankFields.classList.add("hidden");
+        if (methodSelect.value === "crypto")
+          cryptoFields.classList.remove("hidden");
+        else if (methodSelect.value === "paypal")
+          paypalFields.classList.remove("hidden");
+        else if (methodSelect.value === "bank")
+          bankFields.classList.remove("hidden");
+      });
+
+      // Make logos clickable
+      logos.forEach((logo) => {
+        logo.addEventListener("click", () => {
+          bankNameSelect.value = logo.dataset.bank;
+        });
+      });
+    </script>
+  </body>
+</html>
